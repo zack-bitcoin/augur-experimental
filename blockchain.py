@@ -92,7 +92,7 @@ def hexSum(a, b):
 def hexInvert(n):
     # Use double-size for division, to reduce information leakage.
     return tools.buffer_(str(hex(int('f' * 128, 16) / int(n, 16)))[2: -1], 64)
-def add_block(block_pair, DB={}):
+def add_block(block_pair, recent_hashes, DB={}):
     """Attempts adding a new block to the blockchain.
      Median is good for weeding out liars, so long as the liars don't have 51%
      hashpower. """
@@ -171,6 +171,9 @@ def add_block(block_pair, DB={}):
     else:
         block=block_pair
         peer=False
+    if 'prevHash' in block and block['prevHash'] in recent_hashes:
+        #tools.log('we have seen this block already')
+        return 0
     #tools.log('attempt to add block: ' +str(block))
     if block_check(block, DB):
         #tools.log('add_block: ' + str(block))
@@ -183,23 +186,16 @@ def add_block(block_pair, DB={}):
             transactions.update[tx['type']](tx, DB, True)
         for tx in orphans:
             add_tx(tx, DB)
-        #while tools.db_get('length')!=block['length']:
-        #    time.sleep(0.0001)
         if not peer==False:
-            blacklist=tools.db_get('blacklist')
-            p=tools.package(peer)
-            if p in blacklist and blacklist[p]>0:
-                blacklist[p]-=1
-                tools.db_put('blacklist', blacklist)
+            peers=tools.db_get('peers')
+            if peers[peer]['blacklist']>0:
+                peers[peer]['blacklist']-=1
+            tools.db_put('peers', peers)
     elif not peer==False:
-        blacklist=tools.db_get('blacklist')
-        p=tools.package(peer)
-        if p not in blacklist:
-            blacklist[p]=0
-        blacklist[p]+=1
-        tools.db_put('blacklist', blacklist)
-        
-
+        peers=tools.db_get('peers')
+        if peer not in peers:
+            peers[peer]=tools.empty_peer()
+        peers[peer]['blacklist']+=1
 def delete_block(DB):
     """ Removes the most recent block from the blockchain. """
     length=tools.db_get('length')
@@ -249,12 +245,16 @@ def f(blocks_queue, txs_queue):
                 tools.log(exc)
     while True:
         time.sleep(0.1)
+        l=tools.db_get('length')+1
+        v=range(l-10, l)
+        v=filter(lambda x: x>0, v)
+        v=map(lambda x: tools.db_get(x)['prevHash'], v)
         if tools.db_get('stop'):
             tools.dump_out(blocks_queue)
             tools.dump_out(txs_queue)
             return
         while not bb() or not tb():
-            ff(blocks_queue, add_block, bb, 'block')
+            ff(blocks_queue, lambda x: add_block(x, v), bb, 'block')
             ff(txs_queue, add_tx, tb, 'tx')
 import cProfile
 def main(DB): return f(DB["suggested_blocks"], DB["suggested_txs"])

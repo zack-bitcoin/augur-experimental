@@ -8,19 +8,16 @@ def getPublicIp():
     data = str(urlopen('http://checkip.dyndns.com/').read())
     # data = '<html><head><title>Current IP Check</title></head><body>Current IP Address: 65.96.168.198</body></html>\r\n'
     return re.compile(r'Address: (\d+\.\d+\.\d+\.\d+)').search(data).group(1)
+def empty_peer(): return {'blacklist':0, 'lag':40.0, 'diffLength':"0", 'length':0, 'port':custom.port}
 def add_peer(peer, current_peers=0):
-    if type(peer[0]) not in [unicode, str]:
-        if type(peer[0][0]) in [unicode, str]:
-            peer=peer[0]
-        else:
-            log('not a proper peer:'+str(peer))
-            return
     if current_peers==0:
-        current_peers=db_get('peers_ranked')
-    if peer[0] not in map(lambda x: x[0][0], current_peers):
-        log('add peer: '+str(peer))
-        current_peers.append([peer, 40, '0', 0])
-        db_put('peers_ranked',current_peers)
+        current_peers=db_get('peers')
+    if peer in current_peers.keys():
+        return False
+    a=empty_peer()
+    a['port']=custom.port
+    current_peers[peer]=a
+    db_put('peers',current_peers)
 def dump_out(queue):
     while not queue.empty():
         try:
@@ -48,7 +45,6 @@ def det_hash(x):
     """Deterministically takes sha256 of dict, list, int, or string."""
     return hash_(package(x, sort_keys=True))
 def POW(block):
-    #halfHash = det_hash(block)
     h=det_hash(block)
     block[u'nonce'] = random.randint(0, 10000000000000000000000000000000000000000)
     a='F'*64
