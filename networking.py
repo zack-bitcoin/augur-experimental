@@ -48,7 +48,10 @@ def recvall(client, data=''):
     tries=0
     data=data[5:]
     while len(data)<length:
-        d=client.recv(MAX_MESSAGE_SIZE-len(data))
+        try:
+            d=client.recv(MAX_MESSAGE_SIZE-len(data))
+        except:#dirty fix to get Macs to work.
+            return 'broken connection'
         if not d:
             return 'broken connection'
         data+=d
