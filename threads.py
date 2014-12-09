@@ -17,7 +17,7 @@ def main(brainwallet, pubkey_flag=False):
     a=tools.empty_peer()
     a['port']=custom.port
     b=custom.peers
-    b[tools.getPublicIp()]=a
+    b[tools.getPublicIp()+':'+str(custom.port)]=a
     processes= [
         {'target': blockchain.main,
          'args': (DB,),

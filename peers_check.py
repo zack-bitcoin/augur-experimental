@@ -4,7 +4,7 @@ This file explains how we initiate interactions with our peers.
 import time, networking, tools, blockchain, custom, random, sys
 def cmd(peer, x): 
     if type(peer)!=list:
-        peer=[peer, tools.db_get('peers')[peer]['port']]
+        peer=tools.peer_split(peer)
     return networking.send_command(peer, x)
 def download_blocks(peer, DB, peers_block_count, length):
     b=[max(0, length-10), min(peers_block_count, length+custom.download_many)]
@@ -60,13 +60,15 @@ def trade_peers(peer):
             out[p[0][0]]=tools.empty_peer()
             out[p[0][0]]['port']=p[0][1]
         their_peers=out#end of compatibility patch.
-    #tools.log('their_peers: ' +str(their_peers))
+    tools.log('their_peers: ' +str(their_peers))
     if 'error' in their_peers.keys(): return {'error':'cannot connect'}
     def minus(a, b): 
         return filter(lambda p: p not in b, a)
     to_them=minus(peers.keys(), their_peers.keys())
     to_me=minus(their_peers.keys(), peers.keys())
     for p in to_me:
+        if not ':' in p:#these two lines wont be necessary after the networking node finishes downloading the blockchain.
+            p=p+':'+str(their_peers[p]['port'])
         tools.log('peer: ' +str(p))
         tools.add_peer(p)
     cmd(peer, {'type':'recieve_peer', 'peers':to_them})

@@ -8,14 +8,19 @@ def getPublicIp():
     data = str(urlopen('http://checkip.dyndns.com/').read())
     # data = '<html><head><title>Current IP Check</title></head><body>Current IP Address: 65.96.168.198</body></html>\r\n'
     return re.compile(r'Address: (\d+\.\d+\.\d+\.\d+)').search(data).group(1)
-def empty_peer(): return {'blacklist':0, 'lag':40.0, 'diffLength':"0", 'length':0, 'port':custom.port}
+def empty_peer(): return {'blacklist':0, 'lag':40.0, 'diffLength':"0", 'length':0}
+def peer_split(peer):
+    a=peer.split(':')
+    a[1]=int(a[1])
+    return a
+def port_grab(peer): return peer_split(peer)[1]
 def add_peer(peer, current_peers=0):
     if current_peers==0:
         current_peers=db_get('peers')
     if peer in current_peers.keys():
         return False
     a=empty_peer()
-    a['port']=custom.port
+    a['port']=port_grab(peer)
     current_peers[peer]=a
     db_put('peers',current_peers)
 def dump_out(queue):
