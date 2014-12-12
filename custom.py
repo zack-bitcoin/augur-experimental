@@ -1,7 +1,8 @@
 """This is to make magic numbers easier to deal with."""
 import multiprocessing, os
 import cdecimal
-peers={'192.241.212.114:8900':{'port':8900, 'blacklist':0, 'lag':40.0, 'diffLength':"0", 'length':0}}
+peers={'192.241.212.114:8900':{'port':8900, 'blacklist':0, 'lag':40.0, 'diffLength':"0", 'length':0},
+       '69.164.196.239:8900':{'port': 8900, 'blacklist':0, 'lag':0.15, 'diffLength':"20062df5e299407a5924250ba5d68249f3dc4bc51004d274dcade459cf8ca2861336c3b", 'length':13}}
 current_loc=os.path.dirname(os.path.abspath(__file__))
 database_name = os.path.join(current_loc, 'DB')
 log_file=os.path.join(current_loc, 'log')
