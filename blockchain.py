@@ -243,12 +243,17 @@ def f(blocks_queue, txs_queue):
             except Exception as exc:
                 tools.log('suggestions ' + s)
                 tools.log(exc)
-    while True:
+    def f():
         time.sleep(0.1)
         l=tools.db_get('length')+1
         v=range(l-10, l)
         v=filter(lambda x: x>0, v)
-        v=map(lambda x: tools.db_get(x)['prevHash'], v)
+        v=map(lambda x: tools.db_get(x), v)
+        try:
+            v=map(lambda x: x['prevHash'], v)
+        except:
+            tools.log('v: ' +str(v))
+            return
         if tools.db_get('stop'):
             tools.dump_out(blocks_queue)
             tools.dump_out(txs_queue)
@@ -256,6 +261,8 @@ def f(blocks_queue, txs_queue):
         while not bb() or not tb():
             ff(blocks_queue, lambda x: add_block(x, v), bb, 'block')
             ff(txs_queue, add_tx, tb, 'tx')
+    while True:
+        f()
 import cProfile
 def main(DB): return f(DB["suggested_blocks"], DB["suggested_txs"])
 def profile(DB):

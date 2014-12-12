@@ -115,6 +115,7 @@ def connect(msg, port, host='localhost', counter=0):
         return(connect_error(msg, port, host, counter))
     return(data)
 def send_command(peer, msg, response_time=1):
+    #tools.log('send command peer: ' +str(peer))
     return connect(msg, peer[1], peer[0])
 if __name__ == "__main__":
     serve_forever(lambda x: x, 8000)

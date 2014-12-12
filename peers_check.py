@@ -60,7 +60,7 @@ def trade_peers(peer):
             out[p[0][0]]=tools.empty_peer()
             out[p[0][0]]['port']=p[0][1]
         their_peers=out#end of compatibility patch.
-    tools.log('their_peers: ' +str(their_peers))
+    #tools.log('their_peers: ' +str(their_peers))
     if 'error' in their_peers.keys(): return {'error':'cannot connect'}
     def minus(a, b): 
         return filter(lambda p: p not in b, a)
@@ -69,7 +69,7 @@ def trade_peers(peer):
     for p in to_me:
         if not ':' in p:#these two lines wont be necessary after the networking node finishes downloading the blockchain.
             p=p+':'+str(their_peers[p]['port'])
-        tools.log('peer: ' +str(p))
+        #tools.log('peer: ' +str(p))
         tools.add_peer(p)
     cmd(peer, {'type':'recieve_peer', 'peers':to_them})
 def peer_check(peer, DB):

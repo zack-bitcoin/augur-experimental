@@ -17,7 +17,8 @@ def main(brainwallet, pubkey_flag=False):
     a=tools.empty_peer()
     a['port']=custom.port
     b=custom.peers
-    b[tools.getPublicIp()+':'+str(custom.port)]=a
+    my_ip=tools.getPublicIp()
+    b[my_ip+':'+str(custom.port)]=a
     processes= [
         {'target': blockchain.main,
          'args': (DB,),
@@ -51,6 +52,7 @@ def main(brainwallet, pubkey_flag=False):
     tools.db_put('test', 'undefined')
     b=tools.db_existence(0)
     if not b:
+        tools.db_put('ip', my_ip)
         tools.db_put('length', -1)
         tools.db_put('memoized_votes', {})
         tools.db_put('txs', [])
